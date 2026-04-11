@@ -187,13 +187,13 @@ make fresh
 | `make shell` | Open a bash shell in the app container |
 | `make tinker` | Open Laravel Tinker REPL |
 
-The API runs at `http://localhost:8080/api`.
+The API runs at `http://localhost:8080/api` locally, or at `https://task-manager-api-3gab.onrender.com/api` in production.
 
 ---
 
 ## Documentation
 
-API documentation is generated from `postman_collection.json` and rendered via [Redoc](https://github.com/Redocly/redoc).
+API documentation is generated from `task-manager-api.postman_collection.json` and rendered via [Redoc](https://github.com/Redocly/redoc).
 
 **Generate the OpenAPI spec locally:**
 
@@ -201,11 +201,15 @@ API documentation is generated from `postman_collection.json` and rendered via [
 npm run docs
 ```
 
-This reads `postman_collection.json` and outputs `openapi.yaml` at the project root.
+This reads `task-manager-api.postman_collection.json` and outputs `openapi.yaml` at the project root.
 
 **View the docs locally:**
 
 Open `docs/index.html` in a browser (or use VS Code Live Server). Redoc fetches `../openapi.yaml` and renders the full interactive spec.
+
+**Postman documentation:**
+
+[View on Postman](https://documenter.getpostman.com/view/53937112/2sBXitCnJ3)
 
 **Live docs (GitHub Pages):**
 

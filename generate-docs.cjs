@@ -23,7 +23,7 @@ const os = require('os');
 const BASE_URL = 'http://localhost:8080';
 
 async function main() {
-  const input  = path.join(__dirname, 'postman_collection.json');
+  const input  = path.join(__dirname, 'task-manager-api.postman_collection.json');
   const output = path.join(__dirname, 'openapi.yaml');
 
   // Replace {{base_url}} before the library parses URLs — it calls new URL()

@@ -4,4 +4,4 @@ workspace:
 
 localResources:
   collections:
-    - ..\postman_collection.json
+    - ..\task-manager-api.postman_collection.json
