@@ -1,0 +1,31 @@
+$kind: http-request
+name: 'Update task'
+method: PUT
+url: '{{base_url}}/tasks/:id'
+order: 7000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+pathVariables:
+  - key: id
+    value: '{{task_id}}'
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "title": "Updated task title",
+      "description": "Updated via Postman",
+      "completed": true
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Update task returns 200', function () {
+        pm.response.to.have.status(200);
+      });

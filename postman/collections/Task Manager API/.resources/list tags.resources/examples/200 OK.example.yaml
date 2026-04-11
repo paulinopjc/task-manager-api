@@ -1,0 +1,35 @@
+$kind: http-example
+name: '200 OK'
+request:
+  url: '{{base_url}}/tags'
+  method: GET
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    - key: Content-Type
+      value: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "data": [
+          {
+            "id": 3,
+            "name": "bug"
+          },
+          {
+            "id": 4,
+            "name": "auth"
+          },
+          {
+            "id": 5,
+            "name": "docs"
+          },
+          {
+            "id": 6,
+            "name": "release"
+          }
+        ]
+      }
+order: 1000

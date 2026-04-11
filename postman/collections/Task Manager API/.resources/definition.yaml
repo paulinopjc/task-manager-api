@@ -1,0 +1,41 @@
+$kind: collection
+name: 'Task Manager API'
+description: |-
+  Task Manager API (discovered from local Laravel app)
+
+  Authentication
+  - Uses Laravel Sanctum bearer tokens. Obtain a token via /login or /register and set the environment variable `token`.
+
+  Variables
+  - base_url: Base API URL (defaults to local discovery)
+  - token: Bearer token (set after login/register)
+  - task_id: ID of a created task (captured by tests)
+  - tag_id: ID of a created tag (captured when available)
+
+  Structure
+  - Auth: register, login, logout
+  - Tasks: list, create, get, update, delete, attach/detach tags
+  - Tags: list
+  - Health: simple /up endpoint
+
+  Notes / Known gaps
+  - Tag creation endpoint was not discovered; tagging endpoints assume tags exist.
+  - Role-based endpoints and rate limits were not discovered in the scan; protect endpoints are guarded by Sanctum bearer token.
+  - Use the example requests to populate environment variables and test flows.
+
+variables:
+  - key: base_url
+    value: 'http://localhost:8080/api'
+    description: 'Base URL discovered for the API'
+  - key: token
+    value: ''
+    description: 'Bearer token captured after login/register'
+  - key: task_id
+    value: ''
+    description: 'Captured task id from create task response'
+  - key: tag_id
+    value: ''
+    description: 'Captured tag id when available'
+
+scripts: []
+order: 1000

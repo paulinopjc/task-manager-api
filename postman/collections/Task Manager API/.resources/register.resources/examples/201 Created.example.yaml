@@ -1,0 +1,25 @@
+$kind: http-example
+name: '201 Created'
+request:
+  url: '{{base_url}}/register'
+  method: POST
+response:
+  statusCode: 201
+  statusText: Created
+  headers:
+    - key: Content-Type
+      value: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "data": {
+          "user": {
+            "id": 1,
+            "name": "Paulino Awino",
+            "email": "paulino@example.com"
+          },
+          "token": "1|example_register_token"
+        }
+      }
+order: 1000

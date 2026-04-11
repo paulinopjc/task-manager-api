@@ -1,0 +1,25 @@
+$kind: http-request
+name: 'Detach tag from task'
+method: DELETE
+url: '{{base_url}}/tasks/:taskId/tags/:tagId'
+order: 10000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+pathVariables:
+  - key: taskId
+    value: '{{task_id}}'
+  - key: tagId
+    value: '{{tag_id}}'
+headers:
+  - key: Accept
+    value: application/json
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Detach tag returns 200 or 204', function () {
+        pm.expect(pm.response.code).to.be.oneOf([200,204]);
+      });

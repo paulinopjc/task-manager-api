@@ -1,0 +1,20 @@
+$kind: http-request
+name: 'List tasks'
+method: GET
+url: '{{base_url}}/tasks'
+order: 4000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+headers:
+  - key: Accept
+    value: application/json
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('List tasks returns 200', function () {
+        pm.response.to.have.status(200);
+      });

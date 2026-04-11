@@ -1,0 +1,27 @@
+$kind: http-request
+name: 'Delete task'
+method: DELETE
+url: '{{base_url}}/tasks/:id'
+order: 8000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+pathVariables:
+  - key: id
+    value: '{{task_id}}'
+headers:
+  - key: Accept
+    value: application/json
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Delete task returns 200 or 204', function () {
+        pm.expect(pm.response.code).to.be.oneOf([200,204]);
+      });
+      // Clear stored task_id on successful delete
+      if (pm.response.code === 200 || pm.response.code === 204) {
+        pm.environment.unset('task_id');
+      }

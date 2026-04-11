@@ -1,0 +1,29 @@
+$kind: http-request
+name: 'Login'
+method: POST
+url: '{{base_url}}/login'
+order: 2000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "test@example.com",
+      "password": "password"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      // Expect 200 OK and capture token
+      pm.test('Login returns 200', function () {
+        pm.response.to.have.status(200);
+      });
+      var body = {};
+      try { body = pm.response.json(); } catch (e) { body = {}; }
+      var token = body.token || body.access_token || body.data && body.data.token;
+      if (token) {
+        pm.environment.set('token', token);
+      }

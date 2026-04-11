@@ -1,0 +1,68 @@
+$kind: http-example
+name: '200 OK'
+request:
+  url: '{{base_url}}/tasks?status=todo&priority=high&per_page=2'
+  method: GET
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    - key: Content-Type
+      value: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "data": [
+          {
+            "id": 14,
+            "title": "Fix login bug",
+            "description": "Users cannot log in with + in email addresses.",
+            "status": "todo",
+            "priority": "high",
+            "creator": {
+              "id": 1,
+              "name": "Paulino Awino"
+            },
+            "assigned_to": {
+              "id": 2,
+              "name": "Jane Reviewer"
+            },
+            "due_date": "2026-05-15",
+            "tags": [
+              {
+                "id": 3,
+                "name": "bug"
+              },
+              {
+                "id": 4,
+                "name": "auth"
+              }
+            ],
+            "created_at": "2026-04-01T10:15:00.000000Z",
+            "updated_at": "2026-04-01T10:15:00.000000Z"
+          },
+          {
+            "id": 12,
+            "title": "Review registration flow",
+            "description": "Confirm validation messages for duplicate emails.",
+            "status": "todo",
+            "priority": "high",
+            "creator": {
+              "id": 1,
+              "name": "Paulino Awino"
+            },
+            "assigned_to": null,
+            "due_date": "2026-05-20",
+            "tags": [],
+            "created_at": "2026-03-30T08:00:00.000000Z",
+            "updated_at": "2026-03-30T08:00:00.000000Z"
+          }
+        ],
+        "meta": {
+          "next_cursor": "eyJpZCI6MTJ9",
+          "prev_cursor": null,
+          "per_page": 2
+        }
+      }
+order: 1000

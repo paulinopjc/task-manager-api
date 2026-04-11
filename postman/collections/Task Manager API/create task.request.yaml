@@ -1,0 +1,35 @@
+$kind: http-request
+name: 'Create task'
+method: POST
+url: '{{base_url}}/tasks'
+order: 5000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "title": "New task",
+      "description": "A sample task created by Postman",
+      "due_date": "2026-12-31",
+      "completed": false
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Create task returns 201', function () {
+        pm.response.to.have.status(201);
+      });
+      var body = {};
+      try { body = pm.response.json(); } catch (e) { body = {}; }
+      var id = body.id || body.data && body.data.id;
+      if (id) {
+        pm.environment.set('task_id', id.toString());
+      }

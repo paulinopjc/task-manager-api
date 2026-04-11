@@ -1,0 +1,15 @@
+$kind: http-request
+name: 'Health check'
+method: GET
+url: 'http://localhost:8080/up'
+order: 12000
+headers:
+  - key: Accept
+    value: application/json
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Health endpoint returns 200', function () {
+        pm.response.to.have.status(200);
+      });

@@ -1,0 +1,20 @@
+$kind: http-request
+name: 'List tags'
+method: GET
+url: '{{base_url}}/tags'
+order: 11000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+headers:
+  - key: Accept
+    value: application/json
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('List tags returns 200', function () {
+        pm.response.to.have.status(200);
+      });

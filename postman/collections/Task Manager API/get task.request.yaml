@@ -1,0 +1,23 @@
+$kind: http-request
+name: 'Get task'
+method: GET
+url: '{{base_url}}/tasks/:id'
+order: 6000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'
+pathVariables:
+  - key: id
+    value: '{{task_id}}'
+headers:
+  - key: Accept
+    value: application/json
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Get task returns 200', function () {
+        pm.response.to.have.status(200);
+      });
