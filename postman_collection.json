@@ -1,0 +1,314 @@
+{
+  "info": {
+    "name": "Task Manager API",
+    "description": "RESTful API for managing tasks with role-based access control, tagging, filtering, and cursor pagination. Built with Laravel 13 + Sanctum.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string",
+      "description": "Paste your Bearer token here after login"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/api/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Doe\",\n  \"email\": \"jane@example.com\",\n  \"password\": \"password\",\n  \"password_confirmation\": \"password\"\n}"
+            },
+            "description": "Register a new user. Returns user data and a Bearer token."
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"user\": {\n    \"id\": 1,\n    \"name\": \"Jane Doe\",\n    \"email\": \"jane@example.com\",\n    \"role\": \"member\"\n  },\n  \"token\": \"1|abc123...\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/api/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"jane@example.com\",\n  \"password\": \"password\"\n}"
+            },
+            "description": "Login and receive a Bearer token. Copy the token value into the {{token}} collection variable."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"user\": {\n    \"id\": 1,\n    \"name\": \"Jane Doe\",\n    \"email\": \"jane@example.com\",\n    \"role\": \"member\"\n  },\n  \"token\": \"2|xyz789...\"\n}"
+            },
+            {
+              "name": "401 Invalid credentials",
+              "status": "Unauthorized",
+              "code": 401,
+              "body": "{\n  \"message\": \"Invalid credentials.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/api/logout",
+            "description": "Revoke all tokens for the authenticated user."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"message\": \"Logged out successfully.\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Tasks",
+      "item": [
+        {
+          "name": "List Tasks",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tasks",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tasks"],
+              "query": [
+                { "key": "status", "value": "todo", "disabled": true, "description": "todo | in_progress | review | done" },
+                { "key": "priority", "value": "high", "disabled": true, "description": "low | medium | high | urgent" },
+                { "key": "assigned_to", "value": "2", "disabled": true, "description": "User ID" },
+                { "key": "search", "value": "api", "disabled": true, "description": "Search title and description" },
+                { "key": "due_before", "value": "2026-06-01", "disabled": true },
+                { "key": "due_after", "value": "2026-01-01", "disabled": true },
+                { "key": "tag", "value": "backend", "disabled": true },
+                { "key": "sort", "value": "-due_date", "disabled": true, "description": "Prefix - for descending. Options: title, status, priority, due_date, created_at" },
+                { "key": "per_page", "value": "15", "disabled": true, "description": "Max 50" },
+                { "key": "cursor", "value": "", "disabled": true, "description": "Cursor token from previous response" }
+              ]
+            },
+            "description": "List tasks. Admins see all tasks; members see only their own and assigned tasks. Supports filtering, sorting, and cursor pagination."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"title\": \"Build login page\",\n      \"description\": \"Include email/password form\",\n      \"priority\": \"high\",\n      \"status\": \"in_progress\",\n      \"due_date\": \"2026-05-01\",\n      \"creator\": { \"id\": 1, \"name\": \"Jane Doe\" },\n      \"assignee\": null,\n      \"tags\": [{ \"id\": 1, \"name\": \"frontend\" }]\n    }\n  ],\n  \"meta\": {\n    \"next_cursor\": \"eyJpZCI6MX0=\",\n    \"prev_cursor\": null,\n    \"per_page\": 15\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create Task",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/api/tasks",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Build login page\",\n  \"description\": \"Include email/password form with validation\",\n  \"priority\": \"high\",\n  \"status\": \"todo\",\n  \"assigned_to\": null,\n  \"due_date\": \"2026-05-01\"\n}"
+            },
+            "description": "Create a new task. `priority` is required. `status` defaults to `todo` if omitted. `assigned_to` must be a valid user ID."
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"data\": {\n    \"id\": 1,\n    \"title\": \"Build login page\",\n    \"priority\": \"high\",\n    \"status\": \"todo\",\n    \"due_date\": \"2026-05-01\",\n    \"creator\": { \"id\": 1, \"name\": \"Jane Doe\" },\n    \"assignee\": null,\n    \"tags\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Show Task",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/api/tasks/1",
+            "description": "Get a single task by ID. Returns 403 if the user is not the creator, assignee, or an admin."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"id\": 1,\n    \"title\": \"Build login page\",\n    \"description\": \"Include email/password form\",\n    \"priority\": \"high\",\n    \"status\": \"in_progress\",\n    \"due_date\": \"2026-05-01\",\n    \"creator\": { \"id\": 1, \"name\": \"Jane Doe\" },\n    \"assignee\": { \"id\": 2, \"name\": \"John Doe\" },\n    \"tags\": [{ \"id\": 1, \"name\": \"frontend\" }]\n  }\n}"
+            },
+            {
+              "name": "403 Forbidden",
+              "status": "Forbidden",
+              "code": 403,
+              "body": "{\n  \"message\": \"This action is unauthorized.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Task",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/api/tasks/1",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"in_progress\",\n  \"priority\": \"urgent\"\n}"
+            },
+            "description": "Update a task. All fields are optional (partial update). Returns 403 if not authorized."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"id\": 1,\n    \"title\": \"Build login page\",\n    \"priority\": \"urgent\",\n    \"status\": \"in_progress\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Task",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/api/tasks/1",
+            "description": "Delete a task. Members can only delete tasks they created. Admins can delete any task."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"message\": \"Task deleted.\"\n}"
+            },
+            {
+              "name": "403 Forbidden",
+              "status": "Forbidden",
+              "code": 403,
+              "body": "{\n  \"message\": \"This action is unauthorized.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Attach Tags",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/api/tasks/1/tags",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tags\": [\"frontend\", \"bug\", \"urgent\"]\n}"
+            },
+            "description": "Attach tags to a task by name. Tags are created automatically if they don't exist (lowercased). Existing tags on the task are kept."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"id\": 1,\n    \"title\": \"Build login page\",\n    \"tags\": [\n      { \"id\": 1, \"name\": \"frontend\" },\n      { \"id\": 2, \"name\": \"bug\" },\n      { \"id\": 3, \"name\": \"urgent\" }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Detach Tag",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/api/tasks/1/tags/2",
+            "description": "Remove a single tag from a task. The tag record is not deleted, only the relationship."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"message\": \"Tag detached.\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Tags",
+      "item": [
+        {
+          "name": "List Tags",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/api/tags",
+            "description": "List all tags in the system."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": [\n    { \"id\": 1, \"name\": \"frontend\" },\n    { \"id\": 2, \"name\": \"bug\" },\n    { \"id\": 3, \"name\": \"backend\" }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

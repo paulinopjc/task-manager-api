@@ -1,0 +1,392 @@
+openapi: 3.0.0
+info:
+  title: Task Manager API
+  description: >-
+    RESTful API for managing tasks with role-based access control, tagging,
+    filtering, and cursor pagination. Built with Laravel 13 + Sanctum.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: Auth
+  - name: Tasks
+  - name: Tags
+paths:
+  /api/register:
+    post:
+      tags:
+        - Auth
+      summary: Register
+      description: Register a new user. Returns user data and a Bearer token.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: Jane Doe
+                email: jane@example.com
+                password: password
+                password_confirmation: password
+      parameters:
+        - name: Accept
+          in: header
+          schema:
+            type: string
+          example: application/json
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/login:
+    post:
+      tags:
+        - Auth
+      summary: Login
+      description: >-
+        Login and receive a Bearer token. Copy the token value into the
+        {{token}} collection variable.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                email: jane@example.com
+                password: password
+      parameters:
+        - name: Accept
+          in: header
+          schema:
+            type: string
+          example: application/json
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/logout:
+    post:
+      tags:
+        - Auth
+      summary: Logout
+      description: Revoke all tokens for the authenticated user.
+      requestBody:
+        content: {}
+      parameters:
+        - name: Accept
+          in: header
+          schema:
+            type: string
+          example: application/json
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/tasks:
+    get:
+      tags:
+        - Tasks
+      summary: List Tasks
+      description: >-
+        List tasks. Admins see all tasks; members see only their own and
+        assigned tasks. Supports filtering, sorting, and cursor pagination.
+      parameters:
+        - name: Accept
+          in: header
+          schema:
+            type: string
+          example: application/json
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{token}}
+        - name: status
+          in: query
+          schema:
+            type: string
+          description: todo | in_progress | review | done
+          example: todo
+        - name: priority
+          in: query
+          schema:
+            type: string
+          description: low | medium | high | urgent
+          example: high
+        - name: assigned_to
+          in: query
+          schema:
+            type: integer
+          description: User ID
+          example: '2'
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Search title and description
+          example: api
+        - name: due_before
+          in: query
+          schema:
+            type: string
+          example: '2026-06-01'
+        - name: due_after
+          in: query
+          schema:
+            type: string
+          example: '2026-01-01'
+        - name: tag
+          in: query
+          schema:
+            type: string
+          example: backend
+        - name: sort
+          in: query
+          schema:
+            type: string
+          description: >-
+            Prefix - for descending. Options: title, status, priority, due_date,
+            created_at
+          example: '-due_date'
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+          description: Max 50
+          example: '15'
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: Cursor token from previous response
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    post:
+      tags:
+        - Tasks
+      summary: Create Task
+      description: >-
+        Create a new task. `priority` is required. `status` defaults to `todo`
+        if omitted. `assigned_to` must be a valid user ID.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                title: Build login page
+                description: Include email/password form with validation
+                priority: high
+                status: todo
+                assigned_to: null
+                due_date: '2026-05-01'
+      parameters:
+        - name: Accept
+          in: header
+          schema:
+            type: string
+          example: application/json
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/tasks/1:
+    get:
+      tags:
+        - Tasks
+      summary: Show Task
+      description: >-
+        Get a single task by ID. Returns 403 if the user is not the creator,
+        assignee, or an admin.
+      parameters:
+        - name: Accept
+          in: header
+          schema:
+            type: string
+          example: application/json
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    put:
+      tags:
+        - Tasks
+      summary: Update Task
+      description: >-
+        Update a task. All fields are optional (partial update). Returns 403 if
+        not authorized.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                status: in_progress
+                priority: urgent
+      parameters:
+        - name: Accept
+          in: header
+          schema:
+            type: string
+          example: application/json
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    delete:
+      tags:
+        - Tasks
+      summary: Delete Task
+      description: >-
+        Delete a task. Members can only delete tasks they created. Admins can
+        delete any task.
+      parameters:
+        - name: Accept
+          in: header
+          schema:
+            type: string
+          example: application/json
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/tasks/1/tags:
+    post:
+      tags:
+        - Tasks
+      summary: Attach Tags
+      description: >-
+        Attach tags to a task by name. Tags are created automatically if they
+        don't exist (lowercased). Existing tags on the task are kept.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                tags:
+                  - frontend
+                  - bug
+                  - urgent
+      parameters:
+        - name: Accept
+          in: header
+          schema:
+            type: string
+          example: application/json
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/tasks/1/tags/2:
+    delete:
+      tags:
+        - Tasks
+      summary: Detach Tag
+      description: >-
+        Remove a single tag from a task. The tag record is not deleted, only the
+        relationship.
+      parameters:
+        - name: Accept
+          in: header
+          schema:
+            type: string
+          example: application/json
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/tags:
+    get:
+      tags:
+        - Tags
+      summary: List Tags
+      description: List all tags in the system.
+      parameters:
+        - name: Accept
+          in: header
+          schema:
+            type: string
+          example: application/json
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: Bearer {{token}}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
