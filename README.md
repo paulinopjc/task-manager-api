@@ -142,7 +142,7 @@ Docker and Docker Compose
 
 ```bash
 # Clone the repo
-git clone <repo-url> task-manager-api
+git clone https://github.com/paulinopjc/task-manager-api task-manager-api
 cd task-manager-api
 
 # Copy environment config
