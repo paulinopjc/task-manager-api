@@ -3,49 +3,45 @@
 namespace App\Services;
 
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class AuthService
 {
-    public function register(array $data): array
+    public function __construct(
+        private GoogleTokenVerifier $googleVerifier
+    ) {}
+
+    public function loginWithGoogle(string $idToken): array
     {
-        $user = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => $data['password'],
-        ]);
+        $payload = $this->googleVerifier->verify($idToken);
 
-        $token = $user->createToken('auth-token')->plainTextToken;
+        if (! $payload) {
+            throw ValidationException::withMessages([
+                'id_token' => ['Invalid Google ID token.'],
+            ]);
+        }
 
-        return [
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-            ],
-            'token' => $token,
-        ];
-    }
+        $user = User::where('email', $payload['email'])->first();
 
-    public function login(array $data): array
-    {
-        $user = User::where('email', $data['email'])->first();
+        if (! $user) {
+            throw ValidationException::withMessages([
+                'email' => ['This email is not authorized to sign in. Ask an administrator to add you.'],
+            ]);
+        }
 
-        if (! $user || ! Hash::check($data['password'], $user->password)) {
-            abort(401, 'Invalid credentials.');
+        if (! $user->is_active) {
+            throw ValidationException::withMessages([
+                'email' => ['This account has been disabled.'],
+            ]);
+        }
+
+        if (! $user->google_id && $payload['sub']) {
+            $user->update(['google_id' => $payload['sub']]);
         }
 
         $token = $user->createToken('auth-token')->plainTextToken;
 
-        return [
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-            ],
-            'token' => $token,
-        ];
+        return ['user' => $user, 'token' => $token];
     }
 
     public function logout(User $user): void

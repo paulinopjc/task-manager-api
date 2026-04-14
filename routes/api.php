@@ -1,16 +1,15 @@
 <?php
 
+use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\TagController;
+use App\Http\Controllers\Api\TaskController;
 use Illuminate\Support\Facades\Route;
 
-// Public routes
-Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
-Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+Route::post('/auth/google', [AuthController::class, 'google'])->middleware('throttle:10,1');
 
-// Protected routes
 Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
+    Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
     Route::get('/tasks', [TaskController::class, 'index']);
@@ -23,4 +22,9 @@ Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
     Route::delete('/tasks/{taskId}/tags/{tagId}', [TaskController::class, 'detachTag']);
 
     Route::get('/tags', [TagController::class, 'index']);
+
+    Route::get('/admin/users', [AdminController::class, 'listUsers']);
+    Route::post('/admin/users', [AdminController::class, 'createUser']);
+    Route::patch('/admin/users/{user}', [AdminController::class, 'updateUser']);
+    Route::patch('/admin/users/{user}/toggle-active', [AdminController::class, 'toggleUser']);
 });
