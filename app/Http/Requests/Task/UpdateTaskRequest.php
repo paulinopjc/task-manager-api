@@ -22,7 +22,7 @@ class UpdateTaskRequest extends FormRequest
             'priority' => ['sometimes', Rule::enum(TaskPriority::class)],
             'status' => ['sometimes', Rule::enum(TaskStatus::class)],
             'assigned_to' => ['nullable', 'exists:users,id'],
-            'due_date' => ['nullable', 'date', 'after:today'],
+            'due_date' => ['nullable', 'date'],
         ];
     }
 }
